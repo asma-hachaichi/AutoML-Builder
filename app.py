@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 
-BASE_URL = "https://9995-35-231-169-62.ngrok-free.app"
+BASE_URL = "PUBLIC_URL"
 
 st.title("AutoML Builder")
 
@@ -15,8 +15,8 @@ def check_status(task_id):
     response = requests.get(f"{BASE_URL}/monitor/{task_id}")
     return response.json()
 
-def make_prediction(model_path, file):
-    data = {'modelpath': model_path}
+def make_prediction(task_id, file):
+    data = {'task_id': task_id}
     files = {'file': file}
     response = requests.post(f"{BASE_URL}/predict", data=data, files=files)
     return response.json()
@@ -40,10 +40,10 @@ with tab2:
 
 with tab3:
     st.header("Make Predictions")
-    model_path = st.text_input("Enter Model Path")
+    task_id = st.text_input("Enter Model ID")
     prediction_file = st.file_uploader("Choose a CSV file for prediction", type="csv")
     if prediction_file is not None:
         if st.button("Predict"):
-            predictions = make_prediction(model_path, prediction_file)
+            predictions = make_prediction(task_id, prediction_file)
             predictions_df = pd.DataFrame(predictions)
             st.write(predictions_df)
