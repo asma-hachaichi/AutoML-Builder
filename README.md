@@ -35,7 +35,7 @@ The interface for interacting with the API is implemented using **Streamlit**.
    Install the required Python packages by running the following code cell in the notebook autoML_builder.ipynb :
 
    ```bash
-      !pip install fastapi uvicorn h2o pandas requests python-multipart pyngrok
+   !pip install fastapi uvicorn h2o pandas requests python-multipart pyngrok
    ```
 
 2. **Create an Ngrok Profile:**
@@ -43,7 +43,7 @@ The interface for interacting with the API is implemented using **Streamlit**.
    Once signed up, you'll receive an authentication token. Add this token in the second cell of the notebook :
 
    ```bash
-      !ngrok authtoken 'YOUR_NGROK_AUTHTOKEN'
+   !ngrok authtoken 'YOUR_NGROK_AUTHTOKEN'
    ```
 
    This will allow you to create secure tunnels for your FastAPI application.
