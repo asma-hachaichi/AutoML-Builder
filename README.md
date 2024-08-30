@@ -119,6 +119,8 @@ The interface for interacting with the API is implemented using **Streamlit**.
 
 - **Prediction API**: Once a model is successfully trained, the user can make predictions by providing the `task_id` and a new CSV file for prediction. The API loads the previously saved model and makes predictions on the new data, returning the results as a JSON response.
 
+![bloc_diagram_stage drawio](https://github.com/user-attachments/assets/8e66dd69-c910-49e3-bb9d-4316567d2db3)
+
 ---
 
 ## Streamlit Interface
