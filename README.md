@@ -27,6 +27,43 @@ The interface for interacting with the API is implemented using **Streamlit**.
 
 ---
 
+## Detailed Explanation
+
+### 1. Queue Management
+
+- **Task Queue**: The backend uses an in-memory queue (`tasks` dictionary) to manage tasks. When a training request is made, it is assigned a unique `task_id` using `uuid.uuid4()`. Each task is added to the queue with an initial status of `waiting`.
+- **Scheduler**: We use Python’s `sched.scheduler` to manage the execution of tasks. Each task is scheduled with a delay of `0`, ensuring that tasks are processed as soon as possible but still maintaining a First-In-First-Out (FIFO) order. The scheduler is run in a separate asyncio task, allowing the main FastAPI thread to handle other requests while tasks are being processed.
+
+- **Asyncio**: The `asyncio.create_task()` function ensures that the task scheduling is non-blocking. This is essential for handling multiple simultaneous API requests without freezing the server.
+
+### 2. Model Training
+
+- **Data Preprocessing**: Before training, the system limits the number of rows in the dataset to `500` to reduce training time. This is done using a simple sampling method (`limit_rows` function).
+
+- **H2O AutoML**: The API uses H2O’s `AutoML` for model training. By default, the system trains models using three algorithms (`GLM`, `GBM`, `XGBoost`). If the performance of the model is unsatisfactory based on predefined metrics (logloss for classification, R² for regression), the system may include Deep Learning models in the training.
+
+- **Model Saving**: Once a model is trained, it is saved, and its path is stored in the task's `model_details` dictionary along with the relevant metrics (`AUC`, `MSE`, `logloss`... ).
+
+### 3. Task Monitoring
+
+- **Monitor Status**: The `monitor_task` endpoint allows the client to check the status of their task using the `task_id`. The task's status is updated as it progresses from `waiting` to `in_progress`, then to `done` or `error`.
+
+### 4. Prediction
+
+- **Prediction API**: Once a model is successfully trained, the user can make predictions by providing the `task_id` and a new CSV file for prediction. The API loads the previously saved model and makes predictions on the new data, returning the results as a JSON response.
+
+![bloc_diagram_stage drawio](https://github.com/user-attachments/assets/8e66dd69-c910-49e3-bb9d-4316567d2db3)
+
+---
+
+## Streamlit Interface
+
+- **Train Model**: In the "Train Model" tab, upload a CSV file and click "Train Model". The `task_id` will be displayed once training starts.
+- **Monitor Training**: In the "Monitor Training" tab, input the `task_id` and click "Check Status" to see if your model has finished training.
+- **Make Predictions**: In the "Make Predictions" tab, input the `task_id` and upload a CSV file for predictions. The results will be displayed in a table format.
+
+---
+
 ## How to Run the Project
 
 ### Backend Setup (FastAPI + H2O + Uvicorn)
@@ -91,43 +128,6 @@ The interface for interacting with the API is implemented using **Streamlit**.
    - **Train Model**: Upload a CSV file to train a new model.
    - **Monitor Training**: Enter the `task_id` to check the training progress.
    - **Make Predictions**: After training, use the `task_id` and upload a CSV file for predictions.
-
----
-
-## Detailed Explanation
-
-### 1. Queue Management
-
-- **Task Queue**: The backend uses an in-memory queue (`tasks` dictionary) to manage tasks. When a training request is made, it is assigned a unique `task_id` using `uuid.uuid4()`. Each task is added to the queue with an initial status of `waiting`.
-- **Scheduler**: We use Python’s `sched.scheduler` to manage the execution of tasks. Each task is scheduled with a delay of `0`, ensuring that tasks are processed as soon as possible but still maintaining a First-In-First-Out (FIFO) order. The scheduler is run in a separate asyncio task, allowing the main FastAPI thread to handle other requests while tasks are being processed.
-
-- **Asyncio**: The `asyncio.create_task()` function ensures that the task scheduling is non-blocking. This is essential for handling multiple simultaneous API requests without freezing the server.
-
-### 2. Model Training
-
-- **Data Preprocessing**: Before training, the system limits the number of rows in the dataset to `500` to reduce training time. This is done using a simple sampling method (`limit_rows` function).
-
-- **H2O AutoML**: The API uses H2O’s `AutoML` for model training. By default, the system trains models using three algorithms (`GLM`, `GBM`, `XGBoost`). If the performance of the model is unsatisfactory based on predefined metrics (logloss for classification, R² for regression), the system may include Deep Learning models in the training.
-
-- **Model Saving**: Once a model is trained, it is saved, and its path is stored in the task's `model_details` dictionary along with the relevant metrics (`AUC`, `MSE`, `logloss`... ).
-
-### 3. Task Monitoring
-
-- **Monitor Status**: The `monitor_task` endpoint allows the client to check the status of their task using the `task_id`. The task's status is updated as it progresses from `waiting` to `in_progress`, then to `done` or `error`.
-
-### 4. Prediction
-
-- **Prediction API**: Once a model is successfully trained, the user can make predictions by providing the `task_id` and a new CSV file for prediction. The API loads the previously saved model and makes predictions on the new data, returning the results as a JSON response.
-
-![bloc_diagram_stage drawio](https://github.com/user-attachments/assets/8e66dd69-c910-49e3-bb9d-4316567d2db3)
-
----
-
-## Streamlit Interface
-
-- **Train Model**: In the "Train Model" tab, upload a CSV file and click "Train Model". The `task_id` will be displayed once training starts.
-- **Monitor Training**: In the "Monitor Training" tab, input the `task_id` and click "Check Status" to see if your model has finished training.
-- **Make Predictions**: In the "Make Predictions" tab, input the `task_id` and upload a CSV file for predictions. The results will be displayed in a table format.
 
 ---
 
